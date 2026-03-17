@@ -9,11 +9,10 @@ export const Chart: React.FC<ChartProps> = ({ data }) => {
   const chartData = useMemo(() => {
     if (data.length === 0) return [];
     
-    // Find a date or category column for X axis
+ 
     const keys = Object.keys(data[0]);
     const xKey = keys.find(k => k.toLowerCase().includes('date') || k.toLowerCase().includes('category') || k.toLowerCase().includes('name')) || keys[0];
-    
-    // Find numeric columns for Y axis
+
     const yKey = keys.find(k => typeof data[0][k] === 'number') || keys[1];
 
     return data.map(item => ({
@@ -31,7 +30,7 @@ export const Chart: React.FC<ChartProps> = ({ data }) => {
     );
   }
 
-  // Detect outliers for coloring
+
   const values = chartData.map(d => d.value);
   const avg = values.reduce((a, b) => a + b, 0) / values.length;
   const stdDev = Math.sqrt(values.map(x => Math.pow(x - avg, 2)).reduce((a, b) => a + b, 0) / values.length);
