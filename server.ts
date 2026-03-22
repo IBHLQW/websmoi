@@ -1,4 +1,5 @@
 import express, { Request, Response, NextFunction } from "express";
+// Express server configuration
 import { createServer as createViteServer } from "vite";
 import path from "path";
 import fs from "fs";
@@ -10,22 +11,18 @@ const __dirname = path.dirname(__filename);
 async function startServer() {
   const app = express();
   const PORT = 3000;
+
+  // Vite middleware for development
   const vite = await createViteServer({
-    root: process.cwd(),
     server: { middlewareMode: true },
-    appType: "spa",
+    appType: "custom",
   });
   app.use(vite.middlewares);
 
   app.use("*", async (req: Request, res: Response, next: NextFunction) => {
     const url = req.originalUrl;
-
-    
-    if (url.includes(".") && !url.endsWith(".html")) {
-      return next();
-    }
-
     try {
+      // Always serve index.html for all requests that fall through
       let template = fs.readFileSync(path.resolve(__dirname, "index.html"), "utf-8");
       template = await vite.transformIndexHtml(url, template);
       res.status(200).set({ "Content-Type": "text/html" }).end(template);
