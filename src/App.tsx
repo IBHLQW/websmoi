@@ -93,7 +93,7 @@ const App: React.FC = () => {
     doc.text(`Total Records: ${data.length}`, 14, 36);
     const headers = Object.keys(data[0]);
     const body = data.map(row => headers.map(header => row[header]));
-    doc.autoTable({
+    (doc as any).autoTable({
       head: [headers],
       body: body,
       startY: 45,

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { ChevronDown, ChevronUp, Search } from 'lucide-react';
+import { ChevronDown, ChevronUp, Search, Table } from 'lucide-react';
 
 interface DataTableProps {
   data: any[];
@@ -81,34 +81,54 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="mb-4 flex items-center gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-          <input
-            type="text"
-            placeholder="Global search..."
-            className="w-full pl-10 pr-4 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900/10 transition-all"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        <button 
-          onClick={() => setShowFilters(!showFilters)}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all border ${
-            showFilters 
-              ? 'bg-zinc-900 text-white border-zinc-900' 
-              : 'bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50'
-          }`}
-        >
-          {showFilters ? 'Hide Filters' : 'Show Column Filters'}
-        </button>
-        {(searchTerm || Object.values(columnFilters).some(v => v)) && (
+      <div className="mb-4 flex flex-col gap-4">
+        <div className="flex items-center gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+            <input
+              type="text"
+              placeholder="Global search..."
+              className="w-full pl-10 pr-4 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900/10 transition-all"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
           <button 
-            onClick={clearFilters}
-            className="px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            onClick={() => setShowFilters(!showFilters)}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all border flex items-center gap-2 ${
+              showFilters 
+                ? 'bg-zinc-900 text-white border-zinc-900' 
+                : 'bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50'
+            }`}
           >
-            Clear All
+            <Table className="w-4 h-4" />
+            {showFilters ? 'Hide Filters' : 'Show Column Filters'}
           </button>
+          {(searchTerm || Object.values(columnFilters).some(v => v)) && (
+            <button 
+              onClick={clearFilters}
+              className="px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            >
+              Clear All
+            </button>
+          )}
+        </div>
+        
+        {showFilters && (
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3 p-4 bg-zinc-50 border border-zinc-200 rounded-xl animate-in fade-in slide-in-from-top-2 duration-200">
+            {columns.map(col => (
+              <div key={col} className="space-y-1.5">
+                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{col}</label>
+                <input
+                  type="text"
+                  placeholder={`Filter ${col}...`}
+                  className="w-full px-3 py-1.5 text-xs bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-zinc-900/10"
+                  value={columnFilters[col] || ''}
+                  onChange={(e) => handleFilterChange(col, e.target.value)}
+                />
+              </div>
+            ))}
+          </div>
         )}
       </div>
 
@@ -122,7 +142,7 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
                   className="px-4 py-3 font-semibold text-zinc-600 border-b border-zinc-200"
                 >
                   <div 
-                    className="flex items-center gap-2 cursor-pointer hover:text-zinc-900 transition-colors mb-2"
+                    className="flex items-center gap-2 cursor-pointer hover:text-zinc-900 transition-colors"
                     onClick={() => requestSort(col)}
                   >
                     {col}
@@ -130,16 +150,6 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
                       sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
                     ) : null}
                   </div>
-                  {showFilters && (
-                    <input
-                      type="text"
-                      placeholder={`Filter ${col}...`}
-                      className="w-full px-2 py-1 text-xs font-normal bg-white border border-zinc-200 rounded focus:outline-none focus:ring-1 focus:ring-zinc-900/10"
-                      value={columnFilters[col] || ''}
-                      onChange={(e) => handleFilterChange(col, e.target.value)}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  )}
                 </th>
               ))}
             </tr>
