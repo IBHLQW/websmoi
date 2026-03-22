@@ -8,38 +8,56 @@ interface DataTableProps {
 export const DataTable: React.FC<DataTableProps> = ({ data }) => {
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
+  const [showFilters, setShowFilters] = useState(false);
 
   const columns = useMemo(() => {
     if (data.length === 0) return [];
     return Object.keys(data[0]);
   }, [data]);
 
-  const sortedData = useMemo(() => {
-    let sortableItems = [...data];
+  const filteredAndSortedData = useMemo(() => {
+    let result = [...data];
     
-    // Filter
     if (searchTerm) {
-      sortableItems = sortableItems.filter(item => 
+      result = result.filter(item => 
         Object.values(item).some(val => 
           String(val).toLowerCase().includes(searchTerm.toLowerCase())
         )
       );
     }
 
-    // Sort
+    Object.entries(columnFilters).forEach(([key, value]) => {
+      if (value) {
+        result = result.filter(item => 
+          String(item[key]).toLowerCase().includes(value.toLowerCase())
+        );
+      }
+    });
+
     if (sortConfig !== null) {
-      sortableItems.sort((a, b) => {
-        if (a[sortConfig.key] < b[sortConfig.key]) {
+      result.sort((a, b) => {
+        const aVal = a[sortConfig.key];
+        const bVal = b[sortConfig.key];
+
+        if (typeof aVal === 'number' && typeof bVal === 'number') {
+          return sortConfig.direction === 'asc' ? aVal - bVal : bVal - aVal;
+        }
+
+        const aStr = String(aVal).toLowerCase();
+        const bStr = String(bVal).toLowerCase();
+
+        if (aStr < bStr) {
           return sortConfig.direction === 'asc' ? -1 : 1;
         }
-        if (a[sortConfig.key] > b[sortConfig.key]) {
+        if (aStr > bStr) {
           return sortConfig.direction === 'asc' ? 1 : -1;
         }
         return 0;
       });
     }
-    return sortableItems;
-  }, [data, sortConfig, searchTerm]);
+    return result;
+  }, [data, sortConfig, searchTerm, columnFilters]);
 
   const requestSort = (key: string) => {
     let direction: 'asc' | 'desc' = 'asc';
@@ -49,17 +67,49 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
     setSortConfig({ key, direction });
   };
 
+  const handleFilterChange = (key: string, value: string) => {
+    setColumnFilters(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
+
+  const clearFilters = () => {
+    setColumnFilters({});
+    setSearchTerm('');
+  };
+
   return (
     <div className="flex flex-col h-full">
-      <div className="mb-4 relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-        <input
-          type="text"
-          placeholder="Search in data..."
-          className="w-full pl-10 pr-4 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900/10 transition-all"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+      <div className="mb-4 flex items-center gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+          <input
+            type="text"
+            placeholder="Global search..."
+            className="w-full pl-10 pr-4 py-2 bg-zinc-50 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900/10 transition-all"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <button 
+          onClick={() => setShowFilters(!showFilters)}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all border ${
+            showFilters 
+              ? 'bg-zinc-900 text-white border-zinc-900' 
+              : 'bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50'
+          }`}
+        >
+          {showFilters ? 'Hide Filters' : 'Show Column Filters'}
+        </button>
+        {(searchTerm || Object.values(columnFilters).some(v => v)) && (
+          <button 
+            onClick={clearFilters}
+            className="px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+          >
+            Clear All
+          </button>
+        )}
       </div>
 
       <div className="flex-1 overflow-auto border border-zinc-200 rounded-xl">
@@ -69,21 +119,33 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
               {columns.map((col) => (
                 <th
                   key={col}
-                  className="px-4 py-3 font-semibold text-zinc-600 cursor-pointer hover:bg-zinc-100 transition-colors"
-                  onClick={() => requestSort(col)}
+                  className="px-4 py-3 font-semibold text-zinc-600 border-b border-zinc-200"
                 >
-                  <div className="flex items-center gap-2">
+                  <div 
+                    className="flex items-center gap-2 cursor-pointer hover:text-zinc-900 transition-colors mb-2"
+                    onClick={() => requestSort(col)}
+                  >
                     {col}
                     {sortConfig?.key === col ? (
                       sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
                     ) : null}
                   </div>
+                  {showFilters && (
+                    <input
+                      type="text"
+                      placeholder={`Filter ${col}...`}
+                      className="w-full px-2 py-1 text-xs font-normal bg-white border border-zinc-200 rounded focus:outline-none focus:ring-1 focus:ring-zinc-900/10"
+                      value={columnFilters[col] || ''}
+                      onChange={(e) => handleFilterChange(col, e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  )}
                 </th>
               ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-100">
-            {sortedData.map((row, i) => (
+            {filteredAndSortedData.map((row, i) => (
               <tr key={i} className="hover:bg-zinc-50 transition-colors">
                 {columns.map((col) => (
                   <td key={col} className="px-4 py-3 text-zinc-600 font-mono text-xs">
@@ -94,7 +156,7 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
             ))}
           </tbody>
         </table>
-        {sortedData.length === 0 && (
+        {filteredAndSortedData.length === 0 && (
           <div className="p-12 text-center text-zinc-400">
             No matching records found.
           </div>
