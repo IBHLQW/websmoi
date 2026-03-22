@@ -20,6 +20,11 @@ async function startServer() {
 
   app.use("*", async (req: Request, res: Response, next: NextFunction) => {
     const url = req.originalUrl;
+
+    if (url.includes(".") && !url.endsWith(".html")) {
+      return next();
+    }
+
     try {
       let template = fs.readFileSync(path.resolve(process.cwd(), "index.html"), "utf-8");
       template = await vite.transformIndexHtml(url, template);
