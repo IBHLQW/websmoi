@@ -1,9 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { UploadCSV } from './components/ingest';
-import { DataTable } from './components/datagrid';
-import { Chart } from './components/charting';
+import { UploadCSV } from './components/ingest.tsx';
+import { DataTable } from './components/datagrid.tsx';
+import { Chart } from './components/charting.tsx';
 import { LayoutDashboard, Table, PieChart, ArrowUpRight, Activity, Sparkles, Download, FileText, FileSpreadsheet, ChevronDown, CheckCircle2 } from 'lucide-react';
-import _ from 'lodash';
+import * as _ from 'lodash';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
@@ -93,7 +93,7 @@ const App: React.FC = () => {
     doc.text(`Total Records: ${data.length}`, 14, 36);
     const headers = Object.keys(data[0]);
     const body = data.map(row => headers.map(header => row[header]));
-    (doc as any).autoTable({
+    doc.autoTable({
       head: [headers],
       body: body,
       startY: 45,

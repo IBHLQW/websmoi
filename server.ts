@@ -12,6 +12,7 @@ async function startServer() {
   const PORT = 3000;
 
   const vite = await createViteServer({
+    root: process.cwd(),
     server: { middlewareMode: true },
     appType: "custom",
   });
