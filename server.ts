@@ -12,11 +12,22 @@ async function startServer() {
   const PORT = 3000;
 
   const vite = await createViteServer({
-    root: process.cwd(),
     server: { middlewareMode: true },
-    appType: "spa",
+    appType: "custom",
   });
   app.use(vite.middlewares);
+
+  app.use("*", async (req: Request, res: Response, next: NextFunction) => {
+    const url = req.originalUrl;
+    try {
+      let template = fs.readFileSync(path.resolve(__dirname, "index.html"), "utf-8");
+      template = await vite.transformIndexHtml(url, template);
+      res.status(200).set({ "Content-Type": "text/html" }).end(template);
+    } catch (e) {
+      vite.ssrFixStacktrace(e as Error);
+      next(e);
+    }
+  });
 
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://localhost:${PORT}`);
