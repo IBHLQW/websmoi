@@ -8,5 +8,5 @@ export default defineConfig({
   server: {
     middlewareMode: true,
   },
-  appType: 'custom',
+  appType: 'spa',
 });
