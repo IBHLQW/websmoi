@@ -8,6 +8,13 @@ import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+const exportToPDF = (data: any[]) => {
+  if (!data || data.length === 0) return;
+
+  const doc = new jsPDF();
+  autoTable(doc, { /* ... */ });
+  doc.save('datalyse_report.pdf');
+};
 
 const App: React.FC = () => {
   const [data, setData] = useState<any[] | null>(null);

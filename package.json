@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "lint": "tsc --noEmit",
     "predeploy": "npm run build",
-    "deploy": "npx gh-pages -d dist && echo SUCCESS: Your site is published! || echo ERROR: Deployment failed."
+    "deploy": "npx gh-pages -d dist && echo SUCCESS: Your site is published! || echo ERROR: Deployment failed.",
+    "start": "node server.ts"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.0.4",
