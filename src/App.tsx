@@ -8,7 +8,6 @@ import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import 'jspdf-autotable'; (doc as any).autoTable({});
 
 const App: React.FC = () => {
   const [data, setData] = useState<any[] | null>(null);
@@ -85,7 +84,9 @@ const App: React.FC = () => {
 
   const exportToPDF = () => {
     if (!data || data.length === 0) return;
+    console.log('Exporting to PDF...');
     const doc = new jsPDF();
+    console.log('doc initialized:', doc);
     doc.setFontSize(18);
     doc.text('Datalyse Export Report', 14, 22);
     doc.setFontSize(11);
@@ -94,6 +95,7 @@ const App: React.FC = () => {
     doc.text(`Total Records: ${data.length}`, 14, 36);
     const headers = Object.keys(data[0]);
     const body = data.map(row => headers.map(header => row[header]));
+    console.log('Calling autoTable with doc:', doc, 'and autoTable function:', autoTable);
     autoTable(doc, {
       head: [headers],
       body: body,
@@ -311,15 +313,21 @@ const App: React.FC = () => {
                     <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-8">
                       <h4 className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-6">Recent Activity</h4>
                       <div className="space-y-6">
-                        {data.slice(0, 5).map((row, i) => (
-                          <div key={i} className="flex items-center justify-between py-2 border-b border-zinc-50 last:border-0">
-                            <div className="space-y-1">
-                              <p className="text-xs font-bold text-zinc-900">{Object.values(row)[0] as string}</p>
-                              <p className="text-[10px] text-zinc-400 font-mono uppercase">{Object.values(row)[1] as string}</p>
+                        {data.slice(0, 5).map((row, i) => {
+                          const values = Object.values(row);
+                          const dateVal = values[0];
+                          const displayDate = (!dateVal || dateVal === 0 || dateVal === '0') ? 'N/A' : String(dateVal);
+                          
+                          return (
+                            <div key={i} className="flex items-center justify-between py-2 border-b border-zinc-50 last:border-0">
+                              <div className="space-y-1">
+                                <p className="text-xs font-bold text-zinc-900">{displayDate}</p>
+                                <p className="text-[10px] text-zinc-400 font-mono uppercase">{String(values[1] || 'Unknown')}</p>
+                              </div>
+                              <span className="text-xs font-bold font-mono">+{Number(values[2]) || 0}</span>
                             </div>
-                            <span className="text-xs font-bold font-mono">+{Object.values(row)[2] as number}</span>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   </div>

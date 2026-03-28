@@ -14,11 +14,26 @@ export const Chart: React.FC<ChartProps> = ({ data }) => {
     
     const yKey = keys.find(k => typeof data[0][k] === 'number') || keys[1];
 
-    return data.map(item => ({
-      name: item[xKey],
-      value: Number(item[yKey]) || 0,
-      original: item
-    }));
+    return data.map(item => {
+      let xValue = item[xKey];
+      
+      // Handle potential Excel serial dates or 0 values
+      if (typeof xValue === 'number' && xValue > 0 && xValue < 100000) {
+        // This looks like an Excel date (days since 1900)
+        const date = new Date((xValue - 25569) * 86400 * 1000);
+        if (!isNaN(date.getTime())) {
+          xValue = date.toLocaleDateString();
+        }
+      } else if (!xValue || xValue === 0 || xValue === '0') {
+        xValue = 'N/A';
+      }
+
+      return {
+        name: String(xValue),
+        value: Number(item[yKey]) || 0,
+        original: item
+      };
+    });
   }, [data]);
 
   if (data.length === 0) {
