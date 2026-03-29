@@ -3,6 +3,10 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: './', // Use relative paths to ensure assets load correctly on GitHub Pages
+  base: '/websmoi/', // Explicitly set the base path for GitHub Pages subfolder
   plugins: [react(), tailwindcss()],
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+  },
 });
