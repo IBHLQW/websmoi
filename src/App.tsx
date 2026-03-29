@@ -5,16 +5,9 @@ import { Chart } from './components/charting.tsx';
 import { LayoutDashboard, Table, PieChart, ArrowUpRight, Activity, Sparkles, Download, FileText, FileSpreadsheet, ChevronDown, CheckCircle2 } from 'lucide-react';
 import * as _ from 'lodash';
 import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-const exportToPDF = (data: any[]) => {
-  if (!data || data.length === 0) return;
-
-  const doc = new jsPDF();
-  autoTable(doc, { /* ... */ });
-  doc.save('datalyse_report.pdf');
-};
 
 const App: React.FC = () => {
   const [data, setData] = useState<any[] | null>(null);
@@ -102,8 +95,8 @@ const App: React.FC = () => {
     doc.text(`Total Records: ${data.length}`, 14, 36);
     const headers = Object.keys(data[0]);
     const body = data.map(row => headers.map(header => row[header]));
-    console.log('Calling autoTable with doc:', doc, 'and autoTable function:', autoTable);
-    autoTable(doc, {
+    console.log('Calling autoTable with doc:', doc);
+    (doc as any).autoTable({
       head: [headers],
       body: body,
       startY: 45,
