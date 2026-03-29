@@ -3,6 +3,6 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: './',
+  base: './', // GitHub Pages deployment fix: use relative paths
   plugins: [react(), tailwindcss()],
 });

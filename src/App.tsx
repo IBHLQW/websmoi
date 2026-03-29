@@ -96,6 +96,7 @@ const App: React.FC = () => {
     const headers = Object.keys(data[0]);
     const body = data.map(row => headers.map(header => row[header]));
     console.log('Calling autoTable with doc:', doc);
+    // PDF export fix: use the autoTable plugin on the doc instance
     (doc as any).autoTable({
       head: [headers],
       body: body,
