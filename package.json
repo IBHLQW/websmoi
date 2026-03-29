@@ -5,12 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
+    "start": "tsx server.ts",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "tsc --noEmit",
     "predeploy": "npm run build",
-    "deploy": "npx gh-pages -d dist && echo SUCCESS: Your site is published! || echo ERROR: Deployment failed.",
-    "start": "node server.ts"
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.0.4",
